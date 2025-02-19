@@ -108,8 +108,7 @@ const objTime = ref({
 })
 
 const strDate = ref('')
-strDate.value = dateFormat(`${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDay() < 10 ? '0' : ''}${date.getDate()}`)
-
+strDate.value = dateFormat(`${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDay() < 10 ? '' : '0'}${date.getDate()}`)
 setInterval(() => {
   const currentTime = new Date()
   objTime.value = {

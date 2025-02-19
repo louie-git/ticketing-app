@@ -100,9 +100,9 @@
         <div class="">
           <p class="font-bold ">Uploaded Images</p>
           <div class="flex gap-2 flex-row flex-wrap">
-            <div class="w-20 h-20 relative cursor-pointer" v-for="image in arrImages" @click="fnImageModal(image)">
-                <img class="h-full w-full object-cover rounded-md " :src="`/_nuxt/assets/images/${image}`" alt="" >
-                <div class="absolute top-0 w-full h-full opacity-0 flex justify-center items-center hover:opacity-100 hover:backdrop-blur-sm transition-all duration-100">
+            <div class="w-20 h-20 relative cursor-pointer" v-for="file in objTicket.files" @click="fnImageModal(file.name)">
+                <img class="h-full w-full object-cover rounded-md " :src="`${config.public.server_url}/uploads/${file.name}`" alt="image" >
+                <div class="absolute top-0 w-full h-full opacity-0 flex justify-center items-center hover:opacity-100 bg-black/50  transition-all duration-200 rounded-md">
                   <p class="px-1  text-white text-sm">expand</p>
                 </div>
             </div>
@@ -172,7 +172,6 @@ import notification from '../../helpers/notification.js'
 
 const router = useRouter()
 const config = useRuntimeConfig()
-
 const strTicketStatus = ref()
 const strTicketPriority = ref()
 const strImage = ref('')

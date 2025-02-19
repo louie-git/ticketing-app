@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full top-0 left-0 bg-gray-500/30 z-10 items-center flex justify-center">
+  <div class="absolute w-screen h-screen top-0 left-0 bg-gray-500/30 z-10 items-center flex justify-center">
     <div class="
     flex 
     transition-all 

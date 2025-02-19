@@ -43,10 +43,11 @@ const post = async (url, body) => {
     const res = await $fetch(`${url}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/json',
         'Authorization' : `Bearer ${auth.get().access_token}`
       },
-      body: JSON.stringify(body)
+      body
+      // body: JSON.stringify(body)
     })
     response = res.message
   } catch (error) {

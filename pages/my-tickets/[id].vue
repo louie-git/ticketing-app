@@ -45,9 +45,9 @@
       <div class="border p-2 rounded-md w-full  shadow-md">
         <p class="font-semibold ">Uploaded Images</p>
         <div class="flex gap-2 flex-row flex-wrap mt-2">
-          <div class="w-20 h-20 relative cursor-pointer" v-for="image in arrImages" @click="fnImageModal(image)">
-            <img class="h-full w-full object-cover rounded-md " :src="`/_nuxt/assets/images/${image}`" alt="" >
-            <div class="absolute top-0 w-full h-full opacity-0 flex justify-center items-center hover:opacity-100 hover:backdrop-blur-sm transition-all duration-100">
+          <div class="w-20 h-20 relative cursor-pointer" v-for="file in objTicket.files" @click="fnImageModal(file.name)">
+            <img class="h-full w-full object-cover rounded-md " :src="`${config.public.server_url}/uploads/${file.name}`" alt="" >
+            <div class="absolute top-0 w-full h-full opacity-0 flex justify-center items-center hover:opacity-100 bg-black/50 rounded-md transition-all duration-100">
               <p class="px-1  text-white text-sm">expand</p>
             </div>
           </div>
@@ -56,6 +56,8 @@
     </div>
 
   </div>
+  <ImageModal v-if="blnToggleImageModal" :image="strImage" @toggle-modal="fnCloseModal"></ImageModal>
+
 </template>
 
 <script setup>
@@ -63,6 +65,8 @@
 import fetch from '../../api/fetch'
 import {onMounted} from 'vue'
 import dateFormat from '~/helpers/dateFormat.js'
+import ImageModal from '~/components/Modals/ImageModal.vue';
+
 
 definePageMeta({
   layout: 'main-layout'
@@ -70,10 +74,12 @@ definePageMeta({
 
 const router = useRouter()
 const config = useRuntimeConfig()
-const arrImages = ref(['cat1.jpg', 'cat2.jpg', 'cat3.jpg'])
+
 const blnLoading = ref(false)
 const objTicket = ref({})
 const arrAssignee = ref([])
+const blnToggleImageModal = ref(false)
+const strImage = ref('')
 
 const fnFetchData = async () => {
   blnLoading.value = true
@@ -86,6 +92,14 @@ const fnFetchData = async () => {
   arrAssignee.value = [...data.assignee]
   blnLoading.value = false
 }
+
+const fnImageModal = (image) => {
+  blnToggleImageModal.value = true
+  strImage.value = image 
+}
+
+
+const fnCloseModal = () => blnToggleImageModal.value = false
 
 onMounted(async() => {
   await fnFetchData()

@@ -1,5 +1,6 @@
 <template>
   <Modal title="Create Ticket" @close-modal="emit('close-modal')">
+ 
     <div class="p-3 flex-1 flex flex-col justify-between overflow-y-auto">
       <div class="grid grid-cols-1 gap-1">
         <div class="flex flex-col gap-1">
@@ -17,33 +18,38 @@
           
           <textarea class="border p-2 rounded-md outline-none w-full h-36 resize-none" name="" placeholder="Add Description" v-model="ticket.description"></textarea>
         </div>
-        <div class="
-        h-40 
-        border 
-        rounded-md 
-        flex 
-        flex-col 
-        items-center 
-        justify-center
-        " 
-        :class="blnDragOver && 'bg-indigo-50'"
-        @dragover.prevent="onDragOver" 
-        @dragleave.prevent="onDragLeave" 
-        @drop.prevent="fnDropImg"
-        >
-          <img class="w-10" src="~assets/icons/upload.png" alt="upload">
-          <p>Drag image/s to upload or <label class="text-blue-500 cursor-pointer hover:text-blue-800" for="file-input">Browse</label></p>
-          <input class="hidden" type="file" name="" id="file-input" ref="files" accept="image/png, image/gif, image/jpeg" multiple @change="onFileSelect">
-        </div>
+        <form @submit.prevent="submitTicket()" enctype="multipart/form-data">
+          <div class="
+          h-40 
+          border 
+          rounded-md 
+          flex 
+          flex-col 
+          items-center 
+          justify-center
+          " 
+          :class="blnDragOver && 'bg-indigo-50'"
+          @dragover.prevent="onDragOver" 
+          @dragleave.prevent="onDragLeave" 
+          @drop.prevent="fnDropImg"
+          >
+            <img class="w-10" src="~assets/icons/upload.png" alt="upload">
+            <p>Drag image/s to upload or <label class="text-blue-500 cursor-pointer hover:text-blue-800" for="file-input">Browse</label></p>
+            <input class="hidden" type="file" name="" id="file-input" ref="files" accept="image/png, image/gif, image/jpeg" multiple @change="onFileSelect">
+          </div>
+        </form>
         <p class=" text-red-600 text-xs" v-if="arrNotAllowedFiles.length > 0"  > {{fnCheckErrorFileAndCount()}} file/s type not allowed </p>
-
+        <div class="text-xs flex justify-around py-2">
+          <p>Allowed Formats: <span class="text-red-600">jpeg , png</span></p>
+          <p>Maximum File Size: <span class="text-red-600">500Kb</span></p>
+          <p>Maximum Files: <span class="text-red-600">2 Files</span></p>
+        </div>
         <div class=" flex gap-2 flex-wrap">
           <div class="relative w-24 h-24 border rounded-md overflow-hidden " v-for="(img, index) in arrImages">
             <img :src="img.url" alt="uploaded image" class="object-contain w-full h-full m-auto bg-gray-950">
             <font-awesome :icon="'xmark'" class="w-4 h-4 rounded-full bg-white/50 absolute top-1 right-1  cursor-pointer hover:bg-white transition-colors duration-300" @click="fnRemoveImg(index)" />
           </div>
         </div>
-
       </div>
       <div class="mt-auto flex justify-end gap-x-2">
         <input class="px-4 py-1 bg-blue-950 rounded-md font-semibold text-slate-50 hover:opacity-85 duration-200" type="button" value="Clear" >
@@ -80,6 +86,7 @@ const blnFullDisplay = ref(false)
 const blnDragOver = ref(false)
 
 const arrImages = ref([])
+const arrFormdataImages = ref([])
 const arrNotAllowedFiles = ref([])
 
 const onDragOver = () => blnDragOver.value = true
@@ -94,8 +101,7 @@ const arrAllowedFileTypes = ["image/jpeg", "image/png"]
 function fnuploadedFiles(files){  //Push files in array
 
   for(let i = 0; i < files.length; i++){
-    let uri = URL.createObjectURL(files[i])
-
+    arrFormdataImages.value.push(files[i]) // where the actual blob of file is saved.
     if(arrAllowedFileTypes.includes(files[i].type)){
       arrImages.value.push({
         name: files[i].name,
@@ -126,16 +132,22 @@ const onFileSelect = (event) => {
 }
 
 const fnRemoveImg = (index) => {
-  arrImages.value = arrImages.value.filter( (img,i) =>  {
-     if( i!==index ) {
-      return img
-     }
-  })
+  arrFormdataImages.value = arrFormdataImages.value.filter( (img, i) => i !== index)
+  arrImages.value = arrImages.value.filter( (img,i) =>  i !== index)
 }
 
 const submitTicket = async () => {
 
-  const {response, error_response} = await fetch.post(`${config.public.server_url}/tickets`,ticket.value)
+  const formData = new FormData()
+  formData.append('category' , ticket.value.category)
+  formData.append('description' , ticket.value.description)
+  
+
+  for(let file of arrFormdataImages.value){
+    formData.append('files', file)
+  }
+
+  const {response, error_response} = await fetch.post(`${config.public.server_url}/tickets`, formData)
   if(error_response) {
     emit('notification', {
       message: error_response,
@@ -155,7 +167,6 @@ const submitTicket = async () => {
 onMounted(() => {
   setTimeout(() => blnFullDisplay.value = true,10)
 })
-
 
 </script>
 
