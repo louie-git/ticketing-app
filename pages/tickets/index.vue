@@ -43,7 +43,7 @@
         </tr>
       </template>
       <template #loading v-if="blnLoading">
-        <div class="w-full flex justify-center mt-4">
+        <div class="w-full flex justify-center px-8 py-6 backdrop-blur-sm rounded-md">
           <Loading></Loading>
         </div>
       </template>
