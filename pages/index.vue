@@ -35,7 +35,7 @@
             </div>
           </div>
     
-          <p class="text-end hover:text-indigo-800 cursor-pointer">Forgot Password</p>
+          <p class="text-end hover:text-indigo-800 cursor-pointer" @click="blnShowForgotPasswordModal=true">Forgot Password</p>
     
           <div @click="fnLogin">
             <input type="button" value="Sign In" class="w-full h-10 px-2 bg-gray-700 rounded-xl focus:outline-blue-500 mt-1 text-white hover:bg-gray-800 font-bold" >
@@ -95,7 +95,7 @@
         </div>
         
         <div class="">
-          <label for="lname"> Middle Name <span class="text-red-600">*</span></label>
+          <label for="lname"> Middle Name</label>
           <input 
           class="w-full h-8 focus:outline-none border-b-2 focus:border-b-gray-700" 
           type="text" 
@@ -153,6 +153,25 @@
 
     </div>
   </div>
+
+  <div v-if="blnShowForgotPasswordModal" class="fixed flex justify-center items-center top-0 left-0 w-full h-full bg-black/50 text-gray-800">
+    <div class="w-11/12 tablet:w-96 h-64 bg-white rounded-md p-4 flex flex-col justify-between">
+      <div class="mt-4">
+        <p class="text-center text-lg font-semibold">Please enter valid email.</p>
+        <div class="mt-5">
+          <form @submit.prevent="fnResetPasswordRequest">
+            <label for="reset_email">Email</label>
+            <input type="email" id="reset_email" class="border-b-2 w-full h-9 rounded-sm outline-none px-2" v-model="strResetPassword">
+          </form>
+          <p class="font-semibold text-center mt-2" :class="objPasswordResetInfo.success ? 'text-green-600': 'text-red-600' ">{{ objPasswordResetInfo.message }}</p>
+        </div>
+      </div>
+      <div class="w-full flex justify-between">
+        <button class="px-2 py-1 text-white bg-red-600 rounded-md hover:bg-red-600/80" @click="blnShowForgotPasswordModal=false">Cancel</button>
+        <button class="px-2 py-1 text-white bg-green-600 rounded-md hover:bg-green-600/80" @click="fnResetPasswordRequest">Confirm</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -163,8 +182,6 @@ import auth from '../api/auth'
 definePageMeta({
   middleware: ['auth']
 })
-
-
 
 
 const config = useRuntimeConfig()
@@ -182,11 +199,19 @@ const blnLoading = ref(false)
 const strSignupError = ref('')
 const strSingUpSuccess = ref('')
 const strLoginError = ref('')
+const strResetPassword = ref('')
 const file = ref('')
+
+const blnShowForgotPasswordModal = ref(false)
 
 const objLogin = ref({
   email: '',
   password: ''
+})
+
+const objPasswordResetInfo = ref({
+  success: true,
+  message: ''
 })
 
 const objUserDetails = ref({
@@ -228,7 +253,6 @@ const fnRefreshToken = async () => {
   }
 }
 
-
 const fnLogin = async () => {
   if(!inputFormat.test(objLogin.value.email) || !inputFormat.test(objLogin.value.password)) return strLoginError.value = 'Please input required fields.'
   try {
@@ -260,7 +284,6 @@ const fnLogin = async () => {
 
 const fnSignUp = async () => {
   const keys = Object.keys(objUserDetails.value)
-  console.log(keys)
   keys.forEach(key => {
     if(key !== 'middle_name'){ //used to avoid adding restrction on middle name.
       objUserDetailsVerified.value[key] = !inputFormat.test(objUserDetails.value[key]) ?  false : true
@@ -311,6 +334,19 @@ const fnSignUp = async () => {
        strSingUpSuccess.value = ''
     }, 5000)
   }
+}
+
+const fnResetPasswordRequest = async () => {
+  objPasswordResetInfo.value.message = ''
+
+  const {response, error_response} = await fetch.post(`${config.public.server_url}/reset_password_request`, {email: strResetPassword.value});
+  if(error_response) {
+    objPasswordResetInfo.value.message = error_response
+    objPasswordResetInfo.value.success = false
+    return
+  };
+  objPasswordResetInfo.value.message = response
+  objPasswordResetInfo.value.success = true
 }
 
 watch( strLoginError, (val) => {

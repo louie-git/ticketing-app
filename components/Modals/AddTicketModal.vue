@@ -137,12 +137,19 @@ const fnRemoveImg = (index) => {
 }
 
 const submitTicket = async () => {
+  if(!ticket.value.category) {
+    emit('notification', {
+      message: 'Category is required.',
+      success: false
+    })
+    emit('close-modal')
+    return 
+  }
 
   const formData = new FormData()
   formData.append('category' , ticket.value.category)
   formData.append('description' , ticket.value.description)
   
-
   for(let file of arrFormdataImages.value){
     formData.append('files', file)
   }
